@@ -35,6 +35,7 @@ import hudson.util.RunList;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -62,7 +63,7 @@ public class AppaloosaRecorder extends Recorder {
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
-        return BuildStepMonitor.NONE;
+        return BuildStepMonitor.BUILD;
     }
 
     @Override
@@ -70,9 +71,49 @@ public class AppaloosaRecorder extends Recorder {
         if (build.getResult().isWorseOrEqualTo(Result.FAILURE))
             return false;
 
-        listener.getLogger().println("Uploading to Appaloosa");
+        // Validates that the organization token is filled in the project configuration.
+        if (StringUtils.isBlank(getToken())) {
+            listener.error("Appaloosa token not defined in project settings");
+            return false;
+        }
 
-        listener.getLogger().println("Upload to Appaloosa Done");
+        boolean hadFailure = false;
+        boolean hadArtifactsToUpload = false;
+        // Process the list of archived artifacts to find .apk and .ipa files
+        List<Run.Artifact> artifacts = build.getArtifacts();
+        listener.getLogger().println("# of archived artifacts : " + artifacts.size());
+        for (Run.Artifact artifact : artifacts) {
+            if (artifact.getFileName().endsWith(".ipa") || artifact.getFileName().endsWith(".apk")) {
+                hadArtifactsToUpload = true;
+                listener.getLogger().println("Artifact : " + artifact.getDisplayPath());
+                listener.getLogger().println("Uploading to Appaloosa");
+                // Retrieve details from Appaloosa to do the upload
+
+                // Upload the file on Amazon
+
+                // Notify Appaloosa that the file is available
+
+                // Wait for Appaloosa to process the file
+
+                if (false) {
+                    // There was an error
+                    listener.error("Upload to Appaloosa Failed");
+                } else {
+                    // Publish the update on Appaloosa
+
+                    listener.getLogger().println("Upload to Appaloosa Done.");
+                }
+            }
+        }
+        if (!hadArtifactsToUpload) {
+            listener.error("No .ipa or .apk files to upload was found in project archives. Did you configured it to archive such files ?");
+            return false;
+        } else if (hadFailure) {
+            listener.error("There was at least one error while uploading files to appaloosa");
+            return false;
+        }
+
+
         return true;
     }
 
