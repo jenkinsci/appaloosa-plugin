@@ -1,0 +1,1 @@
+This plugin provides an integration with http://www.appaloosa-store.com to automatically deploy mobile binaries (Android, iOS, ...) from Jenkins.
