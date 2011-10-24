@@ -36,11 +36,11 @@ public class AppaloosaUploadBinaryForm {
 	}
 	
 
-	public int getSuccessActionStatus() {
+	public Integer getSuccessActionStatus() {
 		return successActionStatus;
 	}
 
-	public void setSuccessActionStatus(int successActionStatus) {
+	public void setSuccessActionStatus(Integer successActionStatus) {
 		this.successActionStatus = successActionStatus;
 	}
 

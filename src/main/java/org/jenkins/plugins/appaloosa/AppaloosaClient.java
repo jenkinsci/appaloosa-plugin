@@ -1,16 +1,26 @@
 package org.jenkins.plugins.appaloosa;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHost;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 
 public class AppaloosaClient {
@@ -29,8 +39,7 @@ public class AppaloosaClient {
 	 * 
 	 * */
 	public void deployFile(String filePath) throws AppaloosaDeployException{
-        logger.print("Uploading file to Appaloosa");
-        logger.println(filePath);
+        logger.println("Uploading file "+filePath+" to Appaloosa");
         
         // Retrieve details from Appaloosa to do the upload
         AppaloosaUploadBinaryForm uploadForm = getUploadForm();
@@ -39,16 +48,64 @@ public class AppaloosaClient {
         uploadFile(filePath, uploadForm);
 
         // Notify Appaloosa that the file is available
+        long identifier = notifyAppaloosaForFile(filePath, uploadForm);
 
         // Wait for Appaloosa to process the file
         
 	}
 
+	protected long notifyAppaloosaForFile(String filePath, AppaloosaUploadBinaryForm uploadForm) throws AppaloosaDeployException {
+		
+		HttpPost httpPost = new HttpPost(onBinaryUploadUrl());
+		
+		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+		parameters.add(new BasicNameValuePair("token", organisationToken));
+		String key = constructKey(uploadForm.getKey(), filePath);
+		parameters.add(new BasicNameValuePair("key", key));
+		
+		try{
+			httpPost.setEntity(new UrlEncodedFormEntity(parameters ));
+			HttpResponse response = httpClient.execute(httpPost);
+			String json = EntityUtils.toString( response.getEntity(), "UTF-8" );
+			
+			MobileApplicationUpdate update = MobileApplicationUpdate.createFrom(json);
+			return update.id;
+		} catch (AppaloosaDeployException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new AppaloosaDeployException("Error during appaloosa notification", e);
+		}
+	}
+
+	protected String constructKey(String key, String filePath) {
+		String filename = new File(filePath).getName();
+		return StringUtils.replace(key, "{filename}", filename);
+	}
+
 	protected void uploadFile(String filePath,
 			AppaloosaUploadBinaryForm uploadForm) throws AppaloosaDeployException {
-		HttpPost post= new HttpPost(uploadForm.getUrl());
+		
 		try {
-			httpClient.execute(post);
+			File file = new File(filePath);
+
+		    MultipartEntity entity = new MultipartEntity();
+		    ContentBody cbFile = new FileBody(file);
+			entity.addPart("policy", new StringBody( uploadForm.getPolicy(), "text/plain", Charset.forName( "UTF-8" )));
+			entity.addPart("success_action_status", new StringBody( uploadForm.getSuccessActionStatus().toString(), "text/plain", Charset.forName( "UTF-8" )));
+			entity.addPart("Content-Type", new StringBody( uploadForm.getContentType(), "text/plain", Charset.forName( "UTF-8" )));
+			entity.addPart("signature", new StringBody( uploadForm.getSignature(), "text/plain", Charset.forName( "UTF-8" )));
+			entity.addPart("AWSAccessKeyId", new StringBody( uploadForm.getAccessKey(), "text/plain", Charset.forName( "UTF-8" )));
+			entity.addPart("key", new StringBody( uploadForm.getKey(), "text/plain", Charset.forName( "UTF-8" )));
+			entity.addPart("acl", new StringBody( uploadForm.getAcl(), "text/plain", Charset.forName( "UTF-8" )));
+		    entity.addPart("file", cbFile);
+
+			HttpPost httppost = new HttpPost(uploadForm.getUrl());
+			httppost.setEntity(entity);
+			HttpResponse response = httpClient.execute(httppost);
+			String strResponse = EntityUtils.toString( response.getEntity(), "UTF-8" );
+			
+			System.out.println(strResponse);
+			
 		} catch (Exception e) {
 			throw new AppaloosaDeployException("Error while uploading "+filePath, e);
 		}
@@ -70,12 +127,26 @@ public class AppaloosaClient {
 		this.logger = logger;
 	}
 
+	protected String onBinaryUploadUrl() {
+		String url = getAppaloosaBaseUrl();
+		url = url + "api/on_binary_upload";
+		return url;
+	}
+	
 	protected String newBinaryUrl() {
+		String url = getAppaloosaBaseUrl();
+		url = url + "api/upload_binary_form?token="+organisationToken;
+		return url;
+	}
+
+	protected String getAppaloosaBaseUrl() {
 		String url = appaloosaUrl;
 		if (appaloosaPort != 80){
 			url = url + ":"+appaloosaPort;
 		}
-		url = url + "/api/upload_binary_form?token="+organisationToken;
+		if (! url.endsWith("/")){
+			url = url + "/";
+		}
 		return url;
 	}
 
