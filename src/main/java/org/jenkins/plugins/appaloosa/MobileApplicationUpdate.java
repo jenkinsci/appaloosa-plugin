@@ -1,5 +1,6 @@
 package org.jenkins.plugins.appaloosa;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -22,5 +23,13 @@ public class MobileApplicationUpdate {
 					"impossible to parse mobileApplicationUpdate string: "
 							+ json, e);
 		}
+	}
+
+	public boolean isProcessed() {
+		return (status != null && status > 4) || StringUtils.isNotBlank(applicationId);
+	}
+
+	public boolean hasError() {
+		return false;
 	}
 }

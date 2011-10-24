@@ -3,6 +3,7 @@ package org.jenkins.plugins.appaloosa;
 import static com.harlap.test.http.MockHttpServer.Method.GET;
 import static com.harlap.test.http.MockHttpServer.Method.POST;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,25 +40,24 @@ public class AppaloosaClientTest {
 		server.stop();
 	}
 	
-	@Test
-	public void deployFileShouldAskAppaloosaForS3Form() throws AppaloosaDeployException{
-		String url = "/api/upload_binary_form?token=" + ORGANISATION_TOKEN;
-		server.expect(GET, url).respondWith(200, null, sampleBinaryFormResponse);
-		server.expect(POST, "/").respondWith(200, null, "");
-		server.expect(POST, "/api/on_binary_upload").respondWith(200, null, sampleOnBinaryUploadResponse);
-		
-		appaloosaClient.deployFile(getTestFile("fake.ipa"));
-		
-		server.verify();
-	}
 
 	@Test
-	public void deployFileShouldUploadFileWithReturnedParams() throws AppaloosaDeployException{
-		String url = "/api/upload_binary_form?token=" + ORGANISATION_TOKEN;
-		server.expect(GET, url).respondWith(200, null, sampleBinaryFormResponse);
-		server.expect(POST, "/").respondWith(200, null, "");
-		server.expect(POST, "/api/on_binary_upload").respondWith(200, null, sampleOnBinaryUploadResponse);
+	public void deployFileIntegrationTest() throws AppaloosaDeployException{
+		server.expect(GET, "/api/upload_binary_form.json?token=" + ORGANISATION_TOKEN)
+			  .respondWith(200, null, sampleBinaryFormResponse);
+		
+		server.expect(POST, "/")
+			  .respondWith(200, null, "");
+		
+		server.expect(POST, "/api/on_binary_upload")
+			  .respondWith(200, null, sampleOnBinaryUploadResponse);
+		
+		server.expect(GET, "/mobile_application_updates/590.json?token="+ORGANISATION_TOKEN)
+			  .respondWith(200, null, "{\"id\":590, \"status\":1,\"application_id\":\"com.appaloosa.sampleapp\"}");
 
+		server.expect(POST, "/api/publish_update.json")
+		  .respondWith(200, null, "{\"id\":590, \"status\":4,\"application_id\":\"com.appaloosa.sampleapp\"}");
+		
 		appaloosaClient.deployFile(getTestFile("fake.ipa"));
 		
 		server.verify();
@@ -66,7 +66,7 @@ public class AppaloosaClientTest {
 	
 	@Test
 	public void getUploadFormShouldCallAppaloosaAndReturnsObject() throws AppaloosaDeployException{
-		String url = "/api/upload_binary_form?token=" + ORGANISATION_TOKEN;
+		String url = "/api/upload_binary_form.json?token=" + ORGANISATION_TOKEN;
 		server.expect(GET, url).respondWith(200, null, sampleBinaryFormResponse);
 		
 		AppaloosaUploadBinaryForm uploadForm = appaloosaClient.getUploadForm();
@@ -90,20 +90,31 @@ public class AppaloosaClientTest {
 		String url = "/api/on_binary_upload";
 		server.expect(POST, url).respondWith(200, null, "{\"id\":590,\"activation_date\":null, \"other\":\"test\"}");
 		
-		Long id = appaloosaClient.notifyAppaloosaForFile(getTestFile("fake.ipa"), uploadForm);
+		MobileApplicationUpdate update = appaloosaClient.notifyAppaloosaForFile(getTestFile("fake.ipa"), uploadForm);
 		
-		assertEquals(590l, id);
+		assertEquals(590, update.id);
 		
 		server.verify();
 	} 
 	
 	@Test 
 	public void constructKeyTest(){
-		 assertEquals("54/uploads/test.ipa", appaloosaClient.constructKey("54/uploads/{filename}", "/tmp/test.ipa"));
-		 assertEquals("/54/uploads/test.ipa", appaloosaClient.constructKey("/54/uploads/{filename}", "/tmp/test.ipa"));
-		 assertEquals("elsewhere/youpi.apk", appaloosaClient.constructKey("elsewhere/{filename}", "/tmp/other/youpi.apk"));
+		 assertEquals("54/uploads/test.ipa", appaloosaClient.constructKey("54/uploads/${filename}", "/tmp/test.ipa"));
+		 assertEquals("/54/uploads/test.ipa", appaloosaClient.constructKey("/54/uploads/${filename}", "/tmp/test.ipa"));
+		 assertEquals("elsewhere/youpi.apk", appaloosaClient.constructKey("elsewhere/${filename}", "/tmp/other/youpi.apk"));
 	}
-
+	
+	@Test
+	public void getMobileApplicationUpdateDetailsShouldAskAppaloosa() throws AppaloosaDeployException{
+		String url = "/mobile_application_updates/772.json?token="+ORGANISATION_TOKEN;
+		server.expect(GET, url).respondWith(200, null, "{\"id\":772,\"activation_date\":null, \"status\":1,\"application_id\":\"com.appaloosa.sampleapp\", \"other\":\"test\"}");
+		
+		MobileApplicationUpdate update = appaloosaClient.getMobileApplicationUpdateDetails(772);
+		
+		assertNotNull(update);
+		
+		server.verify();
+	}
 	
 	String getTestFile(String filename) {
 		return "src/test/resources/"+filename;

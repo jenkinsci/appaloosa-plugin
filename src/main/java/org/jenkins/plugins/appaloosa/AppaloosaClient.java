@@ -48,13 +48,66 @@ public class AppaloosaClient {
         uploadFile(filePath, uploadForm);
 
         // Notify Appaloosa that the file is available
-        long identifier = notifyAppaloosaForFile(filePath, uploadForm);
+        MobileApplicationUpdate update = notifyAppaloosaForFile(filePath, uploadForm);
 
         // Wait for Appaloosa to process the file
+        while (!update.isProcessed()){
+        	smallWait();
+        	update = getMobileApplicationUpdateDetails(update.id); 
+        }
         
+        // publish update
+        if ( ! update.hasError()){
+        	publish(update);
+        }
 	}
 
-	protected long notifyAppaloosaForFile(String filePath, AppaloosaUploadBinaryForm uploadForm) throws AppaloosaDeployException {
+	protected MobileApplicationUpdate publish(MobileApplicationUpdate update) throws AppaloosaDeployException {
+		HttpPost httpPost = new HttpPost(publishUpdateUrl());
+		
+		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
+		parameters.add(new BasicNameValuePair("token", organisationToken));
+		parameters.add(new BasicNameValuePair("id", update.id.toString()));
+		
+		try{
+			httpPost.setEntity(new UrlEncodedFormEntity(parameters ));
+			HttpResponse response = httpClient.execute(httpPost);
+			String json = EntityUtils.toString( response.getEntity(), "UTF-8" );
+			
+			return MobileApplicationUpdate.createFrom(json);
+		} catch (AppaloosaDeployException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new AppaloosaDeployException("Error during publishing update (id="+update.id+")", e);
+		}
+	}
+
+	protected String publishUpdateUrl() {
+		return getAppaloosaBaseUrl() + "api/publish_update.json";
+	}
+
+	protected MobileApplicationUpdate getMobileApplicationUpdateDetails(Integer id) throws AppaloosaDeployException {
+		HttpGet httpGet = new HttpGet(updateUrl(id));
+		
+		HttpResponse response;
+		try {
+			response = httpClient.execute(httpGet);
+			String json = EntityUtils.toString( response.getEntity(), "UTF-8" );
+			return MobileApplicationUpdate.createFrom(json);
+		} catch (Exception e) {
+			throw new AppaloosaDeployException("Error while get details for update id = " + id, e);
+		}
+	}
+
+	private String updateUrl(Integer id) {
+		return getAppaloosaBaseUrl() + "mobile_application_updates/"+id+".json?token="+organisationToken;
+	}
+
+	protected void smallWait() {
+		
+	}
+
+	protected MobileApplicationUpdate notifyAppaloosaForFile(String filePath, AppaloosaUploadBinaryForm uploadForm) throws AppaloosaDeployException {
 		
 		HttpPost httpPost = new HttpPost(onBinaryUploadUrl());
 		
@@ -68,8 +121,7 @@ public class AppaloosaClient {
 			HttpResponse response = httpClient.execute(httpPost);
 			String json = EntityUtils.toString( response.getEntity(), "UTF-8" );
 			
-			MobileApplicationUpdate update = MobileApplicationUpdate.createFrom(json);
-			return update.id;
+			return MobileApplicationUpdate.createFrom(json);
 		} catch (AppaloosaDeployException e) {
 			throw e;
 		} catch (Exception e) {
@@ -79,7 +131,7 @@ public class AppaloosaClient {
 
 	protected String constructKey(String key, String filePath) {
 		String filename = new File(filePath).getName();
-		return StringUtils.replace(key, "{filename}", filename);
+		return StringUtils.replace(key, "${filename}", filename);
 	}
 
 	protected void uploadFile(String filePath,
@@ -119,7 +171,7 @@ public class AppaloosaClient {
 			AppaloosaUploadBinaryForm uploadForm = AppaloosaUploadBinaryForm.createFormJson(json);
 			return uploadForm;
 		} catch (Exception e) {
-			throw new AppaloosaDeployException("impossible to retrive informations form appaloosa-store.com", e);
+			throw new AppaloosaDeployException("impossible to retrieve upload information from "+appaloosaUrl, e);
 		}
 	}
 
@@ -135,7 +187,7 @@ public class AppaloosaClient {
 	
 	protected String newBinaryUrl() {
 		String url = getAppaloosaBaseUrl();
-		url = url + "api/upload_binary_form?token="+organisationToken;
+		url = url + "api/upload_binary_form.json?token="+organisationToken;
 		return url;
 	}
 
