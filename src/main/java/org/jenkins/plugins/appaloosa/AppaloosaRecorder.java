@@ -26,23 +26,30 @@ package org.jenkins.plugins.appaloosa;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Run;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.RunList;
-import net.sf.json.JSONObject;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import net.sf.json.JSONObject;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
 public class AppaloosaRecorder extends Recorder {
 

@@ -65,7 +65,29 @@
             <url>http://maven.glassfish.org/content/groups/public/</url>
         </pluginRepository>
     </pluginRepositories>
-    <dependencies>
+	<dependencies>
+	    <dependency>
+		    <groupId>com.sun.jersey</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>1.9.1</version>
+		</dependency>
+	    <dependency>
+		    <groupId>com.sun.jersey</groupId>
+		    <artifactId>jersey-json</artifactId>
+		    <version>1.9.1</version>
+		</dependency>
+	    <dependency>
+		    <groupId>org.easymock</groupId>
+		    <artifactId>easymock</artifactId>
+		    <version>3.0</version>
+		    <scope>test</scope>
+		</dependency>
+	    <dependency>
+		    <groupId>com.harlap</groupId>
+		    <artifactId>mock-http-server</artifactId>
+		    <version>1.0.1-SNAPSHOT</version>
+		    <scope>test</scope>
+		</dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
