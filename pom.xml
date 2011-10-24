@@ -67,14 +67,9 @@
     </pluginRepositories>
 	<dependencies>
 	    <dependency>
-		    <groupId>com.sun.jersey</groupId>
-		    <artifactId>jersey-client</artifactId>
-		    <version>1.9.1</version>
-		</dependency>
-	    <dependency>
-		    <groupId>com.sun.jersey</groupId>
-		    <artifactId>jersey-json</artifactId>
-		    <version>1.9.1</version>
+		    <groupId>org.codehaus.jackson</groupId>
+		    <artifactId>jackson-mapper-asl</artifactId>
+		    <version>1.8.3</version>
 		</dependency>
 	    <dependency>
 		    <groupId>org.easymock</groupId>
