@@ -55,30 +55,32 @@ public class AppaloosaClient {
 	 * @throws AppaloosaDeployException when something went wrong
 	 * */
 	public void deployFile(String filePath) throws AppaloosaDeployException{
-        logger.println("Deploy file "+filePath+" to Appaloosa");
+        logger.println("== Deploy file "+filePath+" to Appaloosa");
         
         // Retrieve details from Appaloosa to do the upload
-		logger.println("Ask for upload information");
+		logger.println("==   Ask for upload information");
         AppaloosaUploadBinaryForm uploadForm = getUploadForm();
         
         // Upload the file on Amazon
-        logger.println("Upload file "+filePath);
+        logger.println("==   Upload file "+filePath);
         uploadFile(filePath, uploadForm);
 
         // Notify Appaloosa that the file is available
-		logger.println("Start remote processing file");
+		logger.println("==   Start remote processing file");
         MobileApplicationUpdate update = notifyAppaloosaForFile(filePath, uploadForm);
 
         // Wait for Appaloosa to process the file
         while (!update.isProcessed()){
         	smallWait();
-    		logger.println("Check for application informations");
+    		logger.println("==   Check for application informations");
         	update = getMobileApplicationUpdateDetails(update.id); 
         }
         
         // publish update
         if ( ! update.hasError()){
+        	logger.println("==   Publish uploaded file");
         	publish(update);
+        	logger.println("== File deployed and published successfully");
         }
 	}
 
