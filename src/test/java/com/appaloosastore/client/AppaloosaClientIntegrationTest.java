@@ -1,8 +1,11 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.appaloosastore.client.AppaloosaClient;
+import com.appaloosastore.client.AppaloosaDeployException;
 
 public class AppaloosaClientIntegrationTest {
 

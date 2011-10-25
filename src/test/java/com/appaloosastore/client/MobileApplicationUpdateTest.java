@@ -1,8 +1,10 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import com.appaloosastore.client.MobileApplicationUpdate;
 
 public class MobileApplicationUpdateTest {
 

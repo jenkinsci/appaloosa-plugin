@@ -1,4 +1,4 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -91,7 +91,5 @@ public class AppaloosaUploadBinaryForm {
 	public void setAcl(String acl) {
 		this.acl = acl;
 	}
-
-	
 
 }

@@ -1,9 +1,10 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MobileApplicationUpdate {

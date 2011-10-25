@@ -1,4 +1,4 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 import static com.harlap.test.http.MockHttpServer.Method.GET;
 import static com.harlap.test.http.MockHttpServer.Method.POST;
@@ -9,6 +9,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.appaloosastore.client.AppaloosaClient;
+import com.appaloosastore.client.AppaloosaDeployException;
+import com.appaloosastore.client.AppaloosaUploadBinaryForm;
 import com.harlap.test.http.MockHttpServer;
 
 public class AppaloosaClientTest {
@@ -30,6 +33,7 @@ public class AppaloosaClientTest {
 		appaloosaClient = new AppaloosaClient(ORGANISATION_TOKEN);
 		appaloosaClient.setBaseUrl(BASE_URL);
 		appaloosaClient.setPort(PORT);
+		appaloosaClient.setWaitDuration(10);
 		
 		server = new MockHttpServer(PORT);
 		server.start();

@@ -1,4 +1,4 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -22,13 +22,29 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-
+/**
+ * Client for appaloosa, http://www.appaloosa-store.com.
+ * Usage : <br>
+ * <code>
+ * 	AppaloosaClient client = new AppaloosaClient("my_organisation_token"); <br>
+ *  try {                                                                  <br>
+ *    client.deployFile("/path/to/archive");                               <br>
+ *    System.out.println("Archive deployed");                              <br>
+ *  } catch (AppaloosaDeployException e) {                                 <br>
+ *  	System.err.println("Something went wrong");                        <br>
+ *  }                                                                      <br>
+ * </code> 
+ * Organisation token is available on settings page.
+ * @author Benoit Lafontaine
+ */
 public class AppaloosaClient {
 	private final String organisationToken;
 	private PrintStream logger = System.out;
 	private HttpClient httpClient = new DefaultHttpClient();
 	private String appaloosaUrl = "http://www.appaloosa-store.com";
 	private int appaloosaPort = 80;
+	private int waitDuration = 1000;
+
 	
 	public AppaloosaClient(String organisationToken) {
 		this.organisationToken = organisationToken;
@@ -36,23 +52,27 @@ public class AppaloosaClient {
 
 	/**
 	 * @param filePath physical path of the file to upload 
-	 * 
+	 * @throws AppaloosaDeployException when something went wrong
 	 * */
 	public void deployFile(String filePath) throws AppaloosaDeployException{
-        logger.println("Uploading file "+filePath+" to Appaloosa");
+        logger.println("Deploy file "+filePath+" to Appaloosa");
         
         // Retrieve details from Appaloosa to do the upload
+		logger.println("Ask for upload information");
         AppaloosaUploadBinaryForm uploadForm = getUploadForm();
         
         // Upload the file on Amazon
+        logger.println("Upload file "+filePath);
         uploadFile(filePath, uploadForm);
 
         // Notify Appaloosa that the file is available
+		logger.println("Start remote processing file");
         MobileApplicationUpdate update = notifyAppaloosaForFile(filePath, uploadForm);
 
         // Wait for Appaloosa to process the file
         while (!update.isProcessed()){
         	smallWait();
+    		logger.println("Check for application informations");
         	update = getMobileApplicationUpdateDetails(update.id); 
         }
         
@@ -104,7 +124,10 @@ public class AppaloosaClient {
 	}
 
 	protected void smallWait() {
-		
+		try {
+			Thread.sleep(waitDuration);
+		} catch (InterruptedException e) {
+		}
 	}
 
 	protected MobileApplicationUpdate notifyAppaloosaForFile(String filePath, AppaloosaUploadBinaryForm uploadForm) throws AppaloosaDeployException {
@@ -135,8 +158,7 @@ public class AppaloosaClient {
 	}
 
 	protected void uploadFile(String filePath,
-			AppaloosaUploadBinaryForm uploadForm) throws AppaloosaDeployException {
-		
+			AppaloosaUploadBinaryForm uploadForm) throws AppaloosaDeployException {		
 		try {
 			File file = new File(filePath);
 
@@ -202,12 +224,26 @@ public class AppaloosaClient {
 		return url;
 	}
 
+	/**
+	 * To change the url of appaloosa server.
+	 * Mostly for tests usage or for future evolutions.
+	 * @param appaloosaUrl
+	 */
 	public void setBaseUrl(String appaloosaUrl) {
 		this.appaloosaUrl = appaloosaUrl;
 	}
 
+	/**
+	 * To change port of appaloosa server.
+	 * Mostly for tests usage or for future evolutions.
+	 * @param appaloosaUrl
+	 */
 	public void setPort(int port) {
 		appaloosaPort = port;
+	}
+	
+	protected void setWaitDuration(int waitDuration) {
+		this.waitDuration = waitDuration;
 	}
 	
 }
