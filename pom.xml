@@ -58,6 +58,10 @@
             <id>m.g.o-public</id>
             <url>http://maven.glassfish.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>joel1di1-mvn-repo</id>
+            <url>https://github.com/joel1di1/joel1di1-mvn-repo/raw/master/releases/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -80,7 +84,7 @@
 	    <dependency>
 		    <groupId>com.harlap</groupId>
 		    <artifactId>mock-http-server</artifactId>
-		    <version>1.0.1-SNAPSHOT</version>
+		    <version>1.0.1</version>
 		    <scope>test</scope>
 		</dependency>
         <dependency>
