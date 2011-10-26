@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class AppaloosaUploadBinaryForm {
+public class UploadBinaryForm {
 	private static ObjectMapper jsonMapper = new ObjectMapper();
 	private String policy;
 	@JsonProperty(value="success_action_status")
@@ -19,9 +19,9 @@ public class AppaloosaUploadBinaryForm {
 	private String key;
 	private String acl;
 	
-	public static AppaloosaUploadBinaryForm createFormJson(String json) throws AppaloosaDeployException {
+	public static UploadBinaryForm createFormJson(String json) throws AppaloosaDeployException {
 		try {
-			return jsonMapper.readValue(json, AppaloosaUploadBinaryForm.class);
+			return jsonMapper.readValue(json, UploadBinaryForm.class);
 		} catch (Exception e) {
 			throw new AppaloosaDeployException("Impossible to read response form appaloosa", e);
 		}

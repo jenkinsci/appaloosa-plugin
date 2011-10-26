@@ -12,6 +12,8 @@ public class MobileApplicationUpdate {
 
 	public Integer id;
 	public Integer status;
+	@JsonProperty(value = "status_message")
+	public String statusMessage;
 	@JsonProperty(value = "application_id")
 	public String applicationId;
 
@@ -21,7 +23,7 @@ public class MobileApplicationUpdate {
 			return jsonMapper.readValue(json, MobileApplicationUpdate.class);
 		} catch (Exception e) {
 			throw new AppaloosaDeployException(
-					"impossible to parse mobileApplicationUpdate string: "
+					"Impossible to parse mobileApplicationUpdate string: "
 							+ json, e);
 		}
 	}
@@ -31,6 +33,6 @@ public class MobileApplicationUpdate {
 	}
 
 	public boolean hasError() {
-		return false;
+		return (status != null) && status > 4;
 	}
 }
