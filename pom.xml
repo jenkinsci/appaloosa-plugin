@@ -58,6 +58,10 @@
             <id>m.g.o-public</id>
             <url>http://maven.glassfish.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>joel1di1-mvn-repo</id>
+            <url>https://github.com/joel1di1/joel1di1-mvn-repo/raw/master/releases/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -67,14 +71,9 @@
     </pluginRepositories>
 	<dependencies>
 	    <dependency>
-		    <groupId>com.sun.jersey</groupId>
-		    <artifactId>jersey-client</artifactId>
-		    <version>1.9.1</version>
-		</dependency>
-	    <dependency>
-		    <groupId>com.sun.jersey</groupId>
-		    <artifactId>jersey-json</artifactId>
-		    <version>1.9.1</version>
+		    <groupId>org.codehaus.jackson</groupId>
+		    <artifactId>jackson-mapper-asl</artifactId>
+		    <version>1.8.3</version>
 		</dependency>
 	    <dependency>
 		    <groupId>org.easymock</groupId>
@@ -85,7 +84,7 @@
 	    <dependency>
 		    <groupId>com.harlap</groupId>
 		    <artifactId>mock-http-server</artifactId>
-		    <version>1.0.1-SNAPSHOT</version>
+		    <version>1.0.1</version>
 		    <scope>test</scope>
 		</dependency>
         <dependency>

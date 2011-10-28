@@ -1,4 +1,4 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 public class AppaloosaDeployException extends Exception {
 	

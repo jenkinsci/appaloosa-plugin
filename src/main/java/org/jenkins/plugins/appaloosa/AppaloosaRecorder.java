@@ -51,6 +51,9 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
+import com.appaloosastore.client.AppaloosaClient;
+import com.appaloosastore.client.AppaloosaDeployException;
+
 public class AppaloosaRecorder extends Recorder {
 
     private String token;

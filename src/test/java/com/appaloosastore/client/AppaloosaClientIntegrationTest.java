@@ -1,4 +1,4 @@
-package org.jenkins.plugins.appaloosa;
+package com.appaloosastore.client;
 
 import org.junit.Before;
 import org.junit.Ignore;
