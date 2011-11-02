@@ -49,13 +49,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class AppaloosaRecorder extends Recorder {
+public class AppaloosaPublisher extends Recorder {
 
     public final String token;
     public final String filePattern;
 
     @DataBoundConstructor
-    public AppaloosaRecorder(String token, String filePattern) {
+    public AppaloosaPublisher(String token, String filePattern) {
         this.token = token;
         this.filePattern = filePattern;
     }
@@ -76,23 +76,23 @@ public class AppaloosaRecorder extends Recorder {
 
         // Validates that the organization token is filled in the project configuration.
         if (StringUtils.isBlank(token)) {
-            listener.error(Messages._AppaloosaRecorder_noToken().toString());
+            listener.error(Messages._AppaloosaPublisher_noToken().toString());
             return false;
         }
 
         // Validates that the file pattern is filled in the project configuration.
         if (StringUtils.isBlank(filePattern)) {
-            listener.error(Messages._AppaloosaRecorder_noFilePattern().toString());
+            listener.error(Messages._AppaloosaPublisher_noFilePattern().toString());
             return false;
         }
 
         //search file in the workspace with the pattern
         FileFinder fileFinder = new FileFinder(filePattern);
         List<String> fileNames = build.getWorkspace().act(fileFinder);
-        listener.getLogger().println(Messages.AppaloosaRecorder_foundFiles(fileNames));
+        listener.getLogger().println(Messages.AppaloosaPublisher_foundFiles(fileNames));
 
         if (fileNames.size() == 0) {
-            listener.error(Messages._AppaloosaRecorder_noArtifactsFound(filePattern).toString());
+            listener.error(Messages._AppaloosaPublisher_noArtifactsFound(filePattern).toString());
             return false;
         }
 
@@ -111,11 +111,11 @@ public class AppaloosaRecorder extends Recorder {
                 FilePath remoteFile = build.getWorkspace().child(filename);
                 remoteFile.copyTo(tmpLocalFile);
 
-                listener.getLogger().println(Messages.AppaloosaRecorder_deploying(filename));
+                listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename));
                 appaloosaClient.deployFile(tmpArchive.getAbsolutePath());
-                listener.getLogger().println(Messages.AppaloosaRecorder_deployed());
+                listener.getLogger().println(Messages.AppaloosaPublisher_deployed());
             } catch (Exception e) {
-                listener.getLogger().println(Messages.AppaloosaRecorder_deploymentFailed(e.getMessage()));
+                listener.getLogger().println(Messages.AppaloosaPublisher_deploymentFailed(e.getMessage()));
                 throw new IOException(e.getMessage(), e);
             } finally {
                 FileUtils.deleteQuietly(tmpArchive);
@@ -156,7 +156,7 @@ public class AppaloosaRecorder extends Recorder {
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         public DescriptorImpl() {
-            super(AppaloosaRecorder.class);
+            super(AppaloosaPublisher.class);
             load();
         }
 
