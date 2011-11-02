@@ -24,47 +24,40 @@
 
 package org.jenkins.plugins.appaloosa;
 
+import com.appaloosastore.client.AppaloosaClient;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Run;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.RunList;
+import net.sf.json.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
-
-import com.appaloosastore.client.AppaloosaClient;
-import com.appaloosastore.client.AppaloosaDeployException;
-
 public class AppaloosaRecorder extends Recorder {
 
-    private String token;
-
-    public String getToken() {
-        return this.token;
-    }
+    public final String token;
+    public final String filePattern;
 
     @DataBoundConstructor
-    public AppaloosaRecorder(String token) {
+    public AppaloosaRecorder(String token, String filePattern) {
         this.token = token;
+        this.filePattern = filePattern;
     }
 
     @Override
@@ -77,45 +70,58 @@ public class AppaloosaRecorder extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         if (build.getResult().isWorseOrEqualTo(Result.FAILURE))
             return false;
 
         // Validates that the organization token is filled in the project configuration.
-        if (StringUtils.isBlank(getToken())) {
-            listener.error("Appaloosa token not defined in project settings");
+        if (StringUtils.isBlank(token)) {
+            listener.error(Messages._AppaloosaRecorder_noToken().toString());
             return false;
         }
 
-        boolean hadFailure = false;
-        boolean hadArtifactsToUpload = false;
-        // Process the list of archived artifacts to find .apk and .ipa files
-        List<Run.Artifact> artifacts = build.getArtifacts();
-        listener.getLogger().println("# of archived artifacts : " + artifacts.size());
-        AppaloosaClient appaloosaClient = new AppaloosaClient(getToken());
+        // Validates that the file pattern is filled in the project configuration.
+        if (StringUtils.isBlank(filePattern)) {
+            listener.error(Messages._AppaloosaRecorder_noFilePattern().toString());
+            return false;
+        }
+
+        //search file in the workspace with the pattern
+        FileFinder fileFinder = new FileFinder(filePattern);
+        List<String> fileNames = build.getWorkspace().act(fileFinder);
+        listener.getLogger().println(Messages.AppaloosaRecorder_foundFiles(fileNames));
+
+        if (fileNames.size() == 0) {
+            listener.error(Messages._AppaloosaRecorder_noArtifactsFound(filePattern).toString());
+            return false;
+        }
+
+        AppaloosaClient appaloosaClient = new AppaloosaClient(token);
         appaloosaClient.useLogger(listener.getLogger());
-        
-        for (Run.Artifact artifact : artifacts) {
-            if (artifact.getFileName().endsWith(".ipa") || artifact.getFileName().endsWith(".apk")) {
-                hadArtifactsToUpload = true;
-                listener.getLogger().println("Artifact : " + artifact.getDisplayPath());
-                try{
-                	appaloosaClient.deployFile(artifact.getDisplayPath());
-                	listener.getLogger().println("Upload to Appaloosa Done.");
-                }catch (AppaloosaDeployException e) {
-                    listener.error("Upload to Appaloosa Failed");
-				}
+
+
+        for (String filename : fileNames) {
+            File tmpArchive = File.createTempFile("jenkins", "temp-appaloosa-deploy");
+
+            try {
+
+                // handle remote slave case so copy binary locally
+                Node buildNode = Hudson.getInstance().getNode(build.getBuiltOnStr());
+                FilePath tmpLocalFile = new FilePath(tmpArchive);
+                FilePath remoteFile = build.getWorkspace().child(filename);
+                remoteFile.copyTo(tmpLocalFile);
+
+                listener.getLogger().println(Messages.AppaloosaRecorder_deploying(filename));
+                appaloosaClient.deployFile(tmpArchive.getAbsolutePath());
+                listener.getLogger().println(Messages.AppaloosaRecorder_deployed());
+            } catch (Exception e) {
+                listener.getLogger().println(Messages.AppaloosaRecorder_deploymentFailed(e.getMessage()));
+                throw new IOException(e.getMessage(), e);
+            } finally {
+                FileUtils.deleteQuietly(tmpArchive);
             }
-        }
-        if (!hadArtifactsToUpload) {
-            listener.error("No .ipa or .apk files to upload was found in project archives. Did you configured it to archive such files ?");
-            return false;
-        } else if (hadFailure) {
-            listener.error("There was at least one error while uploading files to appaloosa");
-            return false;
-        }
 
-
+        }
         return true;
     }
 
