@@ -47,16 +47,16 @@ public class FileFinder implements FilePath.FileCallable<List<String>> {
 
     }
 
-    public List<String> invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
-        return find(workspace);
+    public List<String> invoke(File directory, VirtualChannel channel) throws IOException, InterruptedException {
+        return find(directory);
     }
 
-    public List<String> find(final File workspace)  {
+    public List<String> find(final File directory)  {
         try {
             FileSet fileSet = new FileSet();
             Project antProject = new Project();
             fileSet.setProject(antProject);
-            fileSet.setDir(workspace);
+            fileSet.setDir(directory);
             fileSet.setIncludes(pattern);
 
             String[] files = fileSet.getDirectoryScanner(antProject).getIncludedFiles();
