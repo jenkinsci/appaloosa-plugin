@@ -2,7 +2,7 @@
 <!--
   ~ The MIT License
   ~
-  ~ Copyright (c) 2011 Arnaud Héritier
+  ~ Copyright (c) 2011 eXo platform
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -22,87 +22,95 @@
   ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   ~ THE SOFTWARE.
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>1.399</version>
-    </parent>
-    <!-- which version of Jenkins is this plugin built against? -->
-    <artifactId>appaloosa-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>hpi</packaging>
-    <name>Appaloosa Plugin</name>
-    <description>Uploads mobile binaries (Android, iOS, ...) to http://www.appaloosa-store.com
-    </description>
-    <url>http://wiki.jenkins-ci.org/display/JENKINS/Appaloosa+Plugin</url>
-    <developers>
-        <developer>
-            <id>aheritier</id>
-            <name>Arnaud Heritier</name>
-            <email>aheritier@apache.org</email>
-        </developer>
-    </developers>
-    <scm>
-        <connection>scm:git:ssh://github.com/jenkinsci/appaloosa-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/appaloosa-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/appaloosa-plugin</url>
-    </scm>
-    <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
-    <repositories>
-        <repository>
-            <id>m.g.o-public</id>
-            <url>http://maven.glassfish.org/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>joel1di1-mvn-repo</id>
-            <url>https://github.com/joel1di1/joel1di1-mvn-repo/raw/master/releases/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>m.g.o-public</id>
-            <url>http://maven.glassfish.org/content/groups/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
-	<dependencies>
-	    <dependency>
-		    <groupId>org.codehaus.jackson</groupId>
-		    <artifactId>jackson-mapper-asl</artifactId>
-		    <version>1.8.3</version>
-		</dependency>
-	    <dependency>
-		    <groupId>org.easymock</groupId>
-		    <artifactId>easymock</artifactId>
-		    <version>3.0</version>
-		    <scope>test</scope>
-		</dependency>
-	    <dependency>
-		    <groupId>com.harlap</groupId>
-		    <artifactId>mock-http-server</artifactId>
-		    <version>1.0.1</version>
-		    <scope>test</scope>
-		</dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.1.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.1.2</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-    </dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>plugin</artifactId>
+    <version>1.399</version>
+  </parent>
+  <!-- which version of Jenkins is this plugin built against? -->
+  <artifactId>appaloosa-plugin</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>hpi</packaging>
+  <name>Appaloosa Plugin</name>
+  <description>Uploads mobile binaries (Android, iOS, ...) to http://www.appaloosa-store.com</description>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Appaloosa+Plugin</url>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>LICENSE.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>aheritier</id>
+      <name>Arnaud Héritier</name>
+      <email>aheritier@apache.org</email>
+    </developer>
+      <developer>
+        <id>joel1di1</id>
+        <name>Benoit Lafontaine</name>
+        <email>joel1di1@gmail.com</email>
+      </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:ssh://github.com/jenkinsci/appaloosa-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/appaloosa-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/appaloosa-plugin</url>
+  </scm>
+  <!-- get every artifact through maven.glassfish.org, which proxies all the artifacts that we need -->
+  <repositories>
+    <repository>
+      <id>m.g.o-public</id>
+      <url>http://maven.glassfish.org/content/groups/public/</url>
+    </repository>
+    <repository>
+      <id>joel1di1-mvn-repo</id>
+      <url>https://github.com/joel1di1/joel1di1-mvn-repo/raw/master/releases/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>m.g.o-public</id>
+      <url>http://maven.glassfish.org/content/groups/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+  <dependencies>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.8.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.harlap</groupId>
+      <artifactId>mock-http-server</artifactId>
+      <version>1.0.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.1.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>4.1.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.0.1</version>
+    </dependency>
+  </dependencies>
 </project>
