@@ -183,7 +183,7 @@ public class AppaloosaPublisher extends Recorder {
          * This human readable name is used in the configuration screen.
          */
         public String getDisplayName() {
-            return "Upload to Appaloosa";
+            return Messages.AppaloosaPublisher_uploadToAppaloosa();
         }
     }
 }
