@@ -33,13 +33,16 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import hudson.util.FormValidation;
 import hudson.util.RunList;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
@@ -177,6 +180,13 @@ public class AppaloosaPublisher extends Recorder {
             req.bindJSON(this, json);
             save();
             return true;
+        }
+
+        /**
+         * Performs on-the-fly validation on the file mask wildcard.
+         */
+        public FormValidation doCheckFilePattern(@AncestorInPath AbstractProject project, @QueryParameter String value) throws IOException {
+            return FilePath.validateFileMask(project.getSomeWorkspace(),value);
         }
 
         /**
