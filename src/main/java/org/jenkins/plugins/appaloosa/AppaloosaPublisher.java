@@ -99,7 +99,7 @@ public class AppaloosaPublisher extends Recorder {
         AppaloosaClient appaloosaClient = new AppaloosaClient(token);
         appaloosaClient.useLogger(listener.getLogger());
 
-
+        boolean result=true;
         for (String filename : fileNames) {
             File tmpArchive = File.createTempFile("jenkins", "temp-appaloosa-deploy");
 
@@ -116,13 +116,13 @@ public class AppaloosaPublisher extends Recorder {
                 listener.getLogger().println(Messages.AppaloosaPublisher_deployed());
             } catch (Exception e) {
                 listener.getLogger().println(Messages.AppaloosaPublisher_deploymentFailed(e.getMessage()));
-                throw new IOException(e.getMessage(), e);
+                result=false;
             } finally {
                 FileUtils.deleteQuietly(tmpArchive);
             }
 
         }
-        return true;
+        return result;
     }
 
     @Override
