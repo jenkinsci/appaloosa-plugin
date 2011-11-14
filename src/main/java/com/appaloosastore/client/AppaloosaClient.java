@@ -111,6 +111,7 @@ public class AppaloosaClient {
 			logger.println("== File deployed and published successfully");
 		} else {
 			logger.println("== Impossible to publish file: " + update.statusMessage);
+			throw new AppaloosaDeployException(update.statusMessage);
 		}
 	}
 
