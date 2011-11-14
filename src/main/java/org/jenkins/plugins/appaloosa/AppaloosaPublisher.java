@@ -72,7 +72,7 @@ public class AppaloosaPublisher extends Recorder {
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         if (build.getResult().isWorseOrEqualTo(Result.FAILURE))
-            return false;
+            return true; // nothing to do
 
         // Validates that the organization token is filled in the project configuration.
         if (StringUtils.isBlank(token)) {
