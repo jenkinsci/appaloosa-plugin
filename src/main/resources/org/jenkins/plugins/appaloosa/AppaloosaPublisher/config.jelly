@@ -35,7 +35,7 @@
     <f:entry title="${%Token}" field="token" help="/plugin/appaloosa-plugin/help-token.html">
         <f:textbox name="appaloosa.token" value="${instance.token}"/>
     </f:entry>
-    <f:entry title="${%Filename Pattern}" field="filePattern" help="/plugin/appaloosa-plugin/help-file-pattern.html">
+    <f:entry title="${%Filename Pattern}" field="filePattern" help="/plugin/appaloosa-plugin/help-filePattern.html">
         <f:textbox name="appaloosa.filePattern" value="${instance.filePattern}" default="**/*.ipa,**/*.apk"/>
     </f:entry>
 </j:jelly>
