@@ -88,7 +88,13 @@ public class AppaloosaPublisher extends Recorder {
 
         //search file in the workspace with the pattern
         FileFinder fileFinder = new FileFinder(filePattern);
-        List<String> fileNames = build.getWorkspace().act(fileFinder);
+
+        FilePath ws = build.getWorkspace();
+        if (ws==null) { // slave down?
+            listener.error(Messages.AppaloosaPublisher_buildWorkspaceUnavailable());
+            return false;
+        }
+        List<String> fileNames = ws.act(fileFinder);
         listener.getLogger().println(Messages.AppaloosaPublisher_foundFiles(fileNames));
 
         if (fileNames.size() == 0) {

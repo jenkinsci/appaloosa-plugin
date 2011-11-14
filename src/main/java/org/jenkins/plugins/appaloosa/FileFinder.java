@@ -35,16 +35,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @author Olivier Lamy
- */
 public class FileFinder implements FilePath.FileCallable<List<String>> {
 
     private final String pattern;
 
     public FileFinder(final String pattern) {
         this.pattern = pattern;
-
     }
 
     public List<String> invoke(File directory, VirtualChannel channel) throws IOException, InterruptedException {
