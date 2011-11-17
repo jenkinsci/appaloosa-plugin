@@ -28,6 +28,7 @@
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
     <version>1.399</version>
+    <relativePath/>
   </parent>
   <!-- which version of Jenkins is this plugin built against? -->
   <artifactId>appaloosa-plugin</artifactId>
