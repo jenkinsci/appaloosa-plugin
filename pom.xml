@@ -34,7 +34,7 @@
   <version>1.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Appaloosa Plugin</name>
-  <description>Uploads mobile binaries (Android, iOS, ...) to http://www.appaloosa-store.com</description>
+  <description>Publish your mobile applications (Android, iOS, ...) to the &lt;a href="http://www.appaloosa-store.com"&gt;appaloosa-store&lt;/a&gt; platform.</description>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Appaloosa+Plugin</url>
   <licenses>
     <license>
