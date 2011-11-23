@@ -39,6 +39,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -110,10 +111,9 @@ public class AppaloosaPublisher extends Recorder {
 
         boolean result=true;
         for (String filename : fileNames) {
-            File tmpArchive = File.createTempFile("jenkins", "temp-appaloosa-deploy");
+            File tmpArchive = File.createTempFile("jenkins", "temp-appaloosa-deploy."+FilenameUtils.getExtension(filename));
 
             try {
-
                 // handle remote slave case so copy binary locally
                 Node buildNode = Hudson.getInstance().getNode(build.getBuiltOnStr());
                 FilePath tmpLocalFile = new FilePath(tmpArchive);
@@ -134,7 +134,7 @@ public class AppaloosaPublisher extends Recorder {
         return result;
     }
 
-    @Override
+	@Override
     public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
         ArrayList<AppaloosaBuildAction> actions = new ArrayList<AppaloosaBuildAction>();
         RunList<? extends AbstractBuild<?, ?>> builds = project.getBuilds();
