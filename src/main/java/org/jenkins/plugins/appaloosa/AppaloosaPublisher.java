@@ -35,6 +35,12 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -46,22 +52,23 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 public class AppaloosaPublisher extends Recorder {
 
     public final String token;
     public final String filePattern;
-
+	private String proxyHost;
+    private String proxyUser;
+    private String proxyPass;
+    private int proxyPort;
+	
     @DataBoundConstructor
-    public AppaloosaPublisher(String token, String filePattern) {
+    public AppaloosaPublisher(String token, String filePattern, String proxyHost, String proxyUser, String proxyPass, int proxyPort) {
         this.token = token;
         this.filePattern = filePattern;
+		this.proxyHost = proxyHost;
+		this.proxyUser = proxyUser;
+		this.proxyPass = proxyPass;
+		this.proxyPort = proxyPort;
     }
 
     @Override
@@ -101,12 +108,12 @@ public class AppaloosaPublisher extends Recorder {
         List<String> fileNames = ws.act(fileFinder);
         listener.getLogger().println(Messages.AppaloosaPublisher_foundFiles(fileNames));
 
-        if (fileNames.size() == 0) {
+        if (fileNames.isEmpty()) {
             listener.error(Messages._AppaloosaPublisher_noArtifactsFound(filePattern).toString());
             return false;
         }
 
-        AppaloosaClient appaloosaClient = new AppaloosaClient(token);
+        AppaloosaClient appaloosaClient = new AppaloosaClient(token,proxyHost,proxyPort,proxyUser,proxyPass);
         appaloosaClient.useLogger(listener.getLogger());
 
         boolean result=true;
