@@ -121,7 +121,7 @@ public class AppaloosaClient {
 		// Wait for Appaloosa to process the file
 		while (!update.isProcessed()) {
 			smallWait();
-			logger.println("==   Check for application informations");
+			logger.println("==  Check that appaloosa has processed the uploaded file (extract useful information and do some verifications)");
 			update = getMobileApplicationUpdateDetails(update.id);
 		}
 
