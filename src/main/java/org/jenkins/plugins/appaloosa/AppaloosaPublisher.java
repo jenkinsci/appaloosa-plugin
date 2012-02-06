@@ -56,10 +56,10 @@ public class AppaloosaPublisher extends Recorder {
 
     public final String token;
     public final String filePattern;
-	private String proxyHost;
-    private String proxyUser;
-    private String proxyPass;
-    private int proxyPort;
+	public final String proxyHost;
+    public final String proxyUser;
+    public final String proxyPass;
+    public final int proxyPort;
 	
     @DataBoundConstructor
     public AppaloosaPublisher(String token, String filePattern, String proxyHost, String proxyUser, String proxyPass, int proxyPort) {
