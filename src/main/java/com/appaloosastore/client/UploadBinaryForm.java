@@ -90,7 +90,7 @@ public class UploadBinaryForm {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
+		}
 
 	public String getAccessKey() {
 		return accessKey;
