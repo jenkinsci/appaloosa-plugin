@@ -38,4 +38,18 @@
     <f:entry title="${%Filename Pattern}" field="filePattern">
         <f:textbox default="**/*.ipa,**/*.apk"/>
     </f:entry>
+	<f:advanced>
+		<f:entry title="Proxy Host" field="proxyHost">
+			<f:textbox />
+		</f:entry>
+		<f:entry title="Proxy Port" field="proxyPort">
+			<f:textbox />
+		</f:entry>
+	<f:entry title="Proxy User" field="proxyUser">
+		<f:textbox />
+	</f:entry>
+	<f:entry title="Proxy Password" field="proxyPass">
+		<f:password />
+	</f:entry>
+	</f:advanced>
 </j:jelly>
