@@ -24,23 +24,6 @@
 
 package com.appaloosastore.client;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.ParseException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -48,6 +31,27 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Client for appaloosa, http://www.appaloosa-store.com. Usage : <br>
@@ -66,13 +70,30 @@ import java.util.List;
 public class AppaloosaClient {
 	private final String organisationToken;
 	private PrintStream logger = System.out;
-	private HttpClient httpClient = new DefaultHttpClient();
+	private HttpClient httpClient;
 	private String appaloosaUrl = "http://www.appaloosa-store.com";
 	private int appaloosaPort = 80;
 	private int waitDuration = 1000;
+	private String proxyHost;
+    private String proxyUser;
+    private String proxyPass;
+    private int proxyPort;
 
 	public AppaloosaClient(String organisationToken) {
 		this.organisationToken = organisationToken;
+		
+		resetHttpConnection();
+	}
+
+	public AppaloosaClient(String organisationToken, String proxyHost, int proxyPort, String proxyUser, String proxyPass) {
+		this.organisationToken = organisationToken;
+		
+		this.proxyHost = proxyHost;
+		this.proxyUser = proxyUser;
+		this.proxyPass = proxyPass;
+		this.proxyPort = proxyPort;
+		
+		resetHttpConnection();
 	}
 
 	/**
@@ -80,7 +101,7 @@ public class AppaloosaClient {
 	 *            physical path of the file to upload
 	 * @throws AppaloosaDeployException
 	 *             when something went wrong
-	 * */
+	 * */	
 	public void deployFile(String filePath) throws AppaloosaDeployException {
 		logger.println("== Deploy file " + filePath + " to Appaloosa");
 
@@ -135,7 +156,7 @@ public class AppaloosaClient {
 			throw new AppaloosaDeployException(
 					"Error during publishing update (id=" + update.id + ")", e);
 		} finally {
-			releaseHttpConnection();
+			resetHttpConnection();
 		}
 	}
 
@@ -168,7 +189,7 @@ public class AppaloosaClient {
 			throw new AppaloosaDeployException(
 					"Error while get details for update id = " + id, e);
 		} finally {
-			releaseHttpConnection();
+			resetHttpConnection();
 		}
 	}
 
@@ -232,7 +253,7 @@ public class AppaloosaClient {
 			throw new AppaloosaDeployException(
 					"Error during appaloosa notification", e);
 		} finally {
-			releaseHttpConnection();
+			resetHttpConnection();
 		}
 	}
 
@@ -257,10 +278,11 @@ public class AppaloosaClient {
 		} catch (AppaloosaDeployException e) {
 			throw e;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new AppaloosaDeployException("Error while uploading "
-					+ filePath, e);
+					+ filePath + " : "+e.getMessage(), e);
 		} finally {
-			releaseHttpConnection();
+			resetHttpConnection();
 		}
 	}
 
@@ -310,13 +332,24 @@ public class AppaloosaClient {
 					"impossible to retrieve upload information from "
 							+ appaloosaUrl, e);
 		} finally {
-			releaseHttpConnection();
+			resetHttpConnection();
 		}
 	}
 
-	protected void releaseHttpConnection() {
-		httpClient.getConnectionManager().shutdown();
+	private void resetHttpConnection() {
+		if(httpClient!=null)
+			httpClient.getConnectionManager().shutdown();
 		httpClient = new DefaultHttpClient();
+		
+		if(proxyHost!=null && !proxyHost.isEmpty() && proxyPort>0) {
+			Credentials cred = null;
+			if(proxyUser!=null && !proxyUser.isEmpty())
+				cred = new UsernamePasswordCredentials(proxyUser, proxyPass);
+
+			((DefaultHttpClient)httpClient).getCredentialsProvider().setCredentials(new AuthScope(proxyHost, proxyPort),cred);
+			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+		}
 	}
 
 	public void useLogger(PrintStream logger) {
@@ -369,5 +402,4 @@ public class AppaloosaClient {
 	protected void setWaitDuration(int waitDuration) {
 		this.waitDuration = waitDuration;
 	}
-
 }
