@@ -28,19 +28,20 @@ import com.appaloosastore.client.AppaloosaClient;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Hudson;
+import hudson.model.Node;
+import hudson.model.Result;
+import hudson.plugins.promoted_builds.Promotion;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -51,6 +52,13 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class AppaloosaPublisher extends Recorder {
 
@@ -100,12 +108,21 @@ public class AppaloosaPublisher extends Recorder {
         //search file in the workspace with the pattern
         FileFinder fileFinder = new FileFinder(filePattern);
 
-        FilePath ws = build.getWorkspace();
-        if (ws==null) { // slave down?
-            listener.error(Messages.AppaloosaPublisher_buildWorkspaceUnavailable());
-            return false;
+        // Where we'll get artifacts from
+        FilePath rootDir;
+        // If the promotion plugin is used we have to take care to get data from the original build (not the promotion build)
+        if (Hudson.getInstance().getPlugin("promoted-builds") != null && build instanceof Promotion) {
+            rootDir = new FilePath (((Promotion) build).getTarget().getArtifactsDir());
+        } else {
+            rootDir = build.getWorkspace();
+            if (rootDir==null) { // slave down?
+                listener.error(Messages.AppaloosaPublisher_buildWorkspaceUnavailable());
+                return false;
+            }
         }
-        List<String> fileNames = ws.act(fileFinder);
+        listener.getLogger().println(Messages.AppaloosaPublisher_RootDirectory(rootDir));
+
+        List<String> fileNames = rootDir.act(fileFinder);
         listener.getLogger().println(Messages.AppaloosaPublisher_foundFiles(fileNames));
 
         if (fileNames.isEmpty()) {
@@ -113,10 +130,12 @@ public class AppaloosaPublisher extends Recorder {
             return false;
         }
 
+        // Initialize Appaloosa Client
         AppaloosaClient appaloosaClient = new AppaloosaClient(token,proxyHost,proxyPort,proxyUser,proxyPass);
         appaloosaClient.useLogger(listener.getLogger());
 
         boolean result=true;
+        // Deploy each artifact found
         for (String filename : fileNames) {
             File tmpArchive = File.createTempFile("jenkins", "temp-appaloosa-deploy."+FilenameUtils.getExtension(filename));
 
@@ -124,7 +143,7 @@ public class AppaloosaPublisher extends Recorder {
                 // handle remote slave case so copy binary locally
                 Node buildNode = Hudson.getInstance().getNode(build.getBuiltOnStr());
                 FilePath tmpLocalFile = new FilePath(tmpArchive);
-                FilePath remoteFile = build.getWorkspace().child(filename);
+                FilePath remoteFile = rootDir.child(filename);
                 remoteFile.copyTo(tmpLocalFile);
 
                 listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename));
