@@ -76,7 +76,7 @@ public class AppaloosaClient {
 	private HttpClient httpClient;
 	private String appaloosaUrl = "http://www.appaloosa-store.com";
 	private int appaloosaPort = 80;
-	private int waitDuration = 1000;
+	private int waitDuration = 2000;
 	private String proxyHost;
 	private String proxyUser;
 	private String proxyPass;
