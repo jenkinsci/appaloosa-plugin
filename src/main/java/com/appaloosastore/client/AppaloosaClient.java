@@ -68,6 +68,9 @@ import org.apache.http.util.EntityUtils;
  * @author Benoit Lafontaine
  */
 public class AppaloosaClient {
+	
+	public static int MAX_RETRIES = 30; 
+	
 	private final String organisationToken;
 	private PrintStream logger = System.out;
 	private HttpClient httpClient;
@@ -75,24 +78,25 @@ public class AppaloosaClient {
 	private int appaloosaPort = 80;
 	private int waitDuration = 1000;
 	private String proxyHost;
-    private String proxyUser;
-    private String proxyPass;
-    private int proxyPort;
+	private String proxyUser;
+	private String proxyPass;
+	private int proxyPort;
 
 	public AppaloosaClient(String organisationToken) {
 		this.organisationToken = organisationToken;
-		
+
 		resetHttpConnection();
 	}
 
-	public AppaloosaClient(String organisationToken, String proxyHost, int proxyPort, String proxyUser, String proxyPass) {
+	public AppaloosaClient(String organisationToken, String proxyHost,
+			int proxyPort, String proxyUser, String proxyPass) {
 		this.organisationToken = organisationToken;
-		
+
 		this.proxyHost = proxyHost;
 		this.proxyUser = proxyUser;
 		this.proxyPass = proxyPass;
 		this.proxyPort = proxyPort;
-		
+
 		resetHttpConnection();
 	}
 
@@ -101,7 +105,7 @@ public class AppaloosaClient {
 	 *            physical path of the file to upload
 	 * @throws AppaloosaDeployException
 	 *             when something went wrong
-	 * */	
+	 * */
 	public void deployFile(String filePath) throws AppaloosaDeployException {
 		logger.println("== Deploy file " + filePath + " to Appaloosa");
 
@@ -119,21 +123,37 @@ public class AppaloosaClient {
 				uploadForm);
 
 		// Wait for Appaloosa to process the file
-		while (!update.isProcessed()) {
-			smallWait();
-			logger.println("==  Check that appaloosa has processed the uploaded file (extract useful information and do some verifications)");
-			update = getMobileApplicationUpdateDetails(update.id);
-		}
+		update = waitForAppaloosaToProcessFile(update);
 
 		// publish update
-		if (!update.hasError()) {
+		if (update.hasError() == false) {
 			logger.println("==   Publish uploaded file");
 			publish(update);
 			logger.println("== File deployed and published successfully");
 		} else {
-			logger.println("== Impossible to publish file: " + update.statusMessage);
+			logger.println("== Impossible to publish file: "
+					+ update.statusMessage);
 			throw new AppaloosaDeployException(update.statusMessage);
 		}
+	}
+
+	protected MobileApplicationUpdate waitForAppaloosaToProcessFile(
+			MobileApplicationUpdate update) throws AppaloosaDeployException {
+		int retries = 0;
+		while (!update.isProcessed() && retries < MAX_RETRIES) {
+			smallWait();
+			logger.println("==  Check that appaloosa has processed the uploaded file (extract useful information and do some verifications)");
+			try{
+				update = getMobileApplicationUpdateDetails(update.id);
+				retries = 0;
+			}catch (Exception e) {
+				retries++;
+			}
+		}
+		if (retries >= MAX_RETRIES) {
+			throw new AppaloosaDeployException("Appaloosa servers seems to be down. Please retry later. Sorry for breaking your build...");
+		}
+		return update;
 	}
 
 	protected MobileApplicationUpdate publish(MobileApplicationUpdate update)
@@ -160,7 +180,8 @@ public class AppaloosaClient {
 		}
 	}
 
-	protected String readBodyResponse(HttpResponse response) throws ParseException, IOException {
+	protected String readBodyResponse(HttpResponse response)
+			throws ParseException, IOException {
 		return EntityUtils.toString(response.getEntity(), "UTF-8");
 	}
 
@@ -168,7 +189,7 @@ public class AppaloosaClient {
 		return getAppaloosaBaseUrl() + "api/publish_update.json";
 	}
 
-	protected MobileApplicationUpdate getMobileApplicationUpdateDetails(
+	public MobileApplicationUpdate getMobileApplicationUpdateDetails(
 			Integer id) throws AppaloosaDeployException {
 		HttpGet httpGet = new HttpGet(updateUrl(id));
 
@@ -231,8 +252,7 @@ public class AppaloosaClient {
 	}
 
 	protected MobileApplicationUpdate notifyAppaloosaForFile(String filePath,
-			UploadBinaryForm uploadForm)
-			throws AppaloosaDeployException {
+			UploadBinaryForm uploadForm) throws AppaloosaDeployException {
 
 		HttpPost httpPost = new HttpPost(onBinaryUploadUrl());
 
@@ -262,7 +282,8 @@ public class AppaloosaClient {
 		return StringUtils.replace(key, "${filename}", filename);
 	}
 
-	protected void uploadFile(String filePath, UploadBinaryForm uploadForm) throws AppaloosaDeployException {
+	protected void uploadFile(String filePath, UploadBinaryForm uploadForm)
+			throws AppaloosaDeployException {
 		try {
 			File file = new File(filePath);
 			HttpPost httppost = createHttpPost(uploadForm, file);
@@ -280,19 +301,20 @@ public class AppaloosaClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new AppaloosaDeployException("Error while uploading "
-					+ filePath + " : "+e.getMessage(), e);
+					+ filePath + " : " + e.getMessage(), e);
 		} finally {
 			resetHttpConnection();
 		}
 	}
 
-	protected HttpPost createHttpPost(UploadBinaryForm uploadForm,
-			File file) throws UnsupportedEncodingException {
+	protected HttpPost createHttpPost(UploadBinaryForm uploadForm, File file)
+			throws UnsupportedEncodingException {
 		MultipartEntity entity = new MultipartEntity();
 		ContentBody cbFile = new FileBody(file);
 		addParam(entity, "policy", uploadForm.getPolicy());
 
-		addParam(entity, "success_action_status", uploadForm.getSuccessActionStatus().toString());
+		addParam(entity, "success_action_status", uploadForm
+				.getSuccessActionStatus().toString());
 		addParam(entity, "Content-Type", uploadForm.getContentType());
 		addParam(entity, "signature", uploadForm.getSignature());
 		addParam(entity, "AWSAccessKeyId", uploadForm.getAccessKey());
@@ -318,14 +340,12 @@ public class AppaloosaClient {
 		return body.substring(start, end);
 	}
 
-	protected UploadBinaryForm getUploadForm()
-			throws AppaloosaDeployException {
+	protected UploadBinaryForm getUploadForm() throws AppaloosaDeployException {
 		HttpGet httpGet = new HttpGet(newBinaryUrl());
 		try {
 			HttpResponse response = httpClient.execute(httpGet);
 			String json = IOUtils.toString(response.getEntity().getContent());
-			UploadBinaryForm uploadForm = UploadBinaryForm
-					.createFormJson(json);
+			UploadBinaryForm uploadForm = UploadBinaryForm.createFormJson(json);
 			return uploadForm;
 		} catch (Exception e) {
 			throw new AppaloosaDeployException(
@@ -337,18 +357,20 @@ public class AppaloosaClient {
 	}
 
 	private void resetHttpConnection() {
-		if(httpClient!=null)
+		if (httpClient != null)
 			httpClient.getConnectionManager().shutdown();
 		httpClient = new DefaultHttpClient();
-		
-		if(proxyHost!=null && !proxyHost.isEmpty() && proxyPort>0) {
+
+		if (proxyHost != null && !proxyHost.isEmpty() && proxyPort > 0) {
 			Credentials cred = null;
-			if(proxyUser!=null && !proxyUser.isEmpty())
+			if (proxyUser != null && !proxyUser.isEmpty())
 				cred = new UsernamePasswordCredentials(proxyUser, proxyPass);
 
-			((DefaultHttpClient)httpClient).getCredentialsProvider().setCredentials(new AuthScope(proxyHost, proxyPort),cred);
+			((DefaultHttpClient) httpClient).getCredentialsProvider()
+					.setCredentials(new AuthScope(proxyHost, proxyPort), cred);
 			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
-			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
+					proxy);
 		}
 	}
 
