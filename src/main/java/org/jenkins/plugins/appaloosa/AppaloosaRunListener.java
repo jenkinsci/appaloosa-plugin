@@ -30,7 +30,6 @@ import hudson.model.BuildListener;
 import hudson.model.JobProperty;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
-import hudson.plugins.promoted_builds.JobPropertyImpl;
 import hudson.plugins.promoted_builds.PromotedProjectAction;
 import hudson.plugins.promoted_builds.PromotionProcess;
 import hudson.tasks.ArtifactArchiver;
@@ -44,8 +43,8 @@ public class AppaloosaRunListener extends RunListener<AbstractBuild> {
 
     public void onCompleted(AbstractBuild r, TaskListener listener) {
         // Searching for the promotion plugin
-        if (r.getProject().getProperty(JobPropertyImpl.class) != null) {
-            JobProperty promotionJobProperty = r.getProject().getProperty(JobPropertyImpl.class);
+        if (r.getProject().getProperty(JobProperty.class) != null) {
+            JobProperty promotionJobProperty = r.getProject().getProperty(JobProperty.class);
             // Search in promotions if one of them is using Appaloosa
             for (PromotionProcess process : ((PromotedProjectAction) promotionJobProperty.getProjectAction(r.getProject())).getProcesses()) {
                 // Search for a build step using Appaloosa
