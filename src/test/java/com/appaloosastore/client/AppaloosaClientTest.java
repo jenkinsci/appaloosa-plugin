@@ -77,6 +77,17 @@ public class AppaloosaClientTest {
 	public void tearDown() throws Exception {
 		server.stop();
 	}
+	
+	@Test
+	public void appaloosaClientShouldTrimToken() throws AppaloosaDeployException{
+		appaloosaClient = new AppaloosaClient("   " + ORGANISATION_TOKEN + "  \t  ");
+
+		String url = "/api/upload_binary_form.json?token=" + ORGANISATION_TOKEN;
+		server.expect(GET, url)
+				.respondWith(200, null, sampleBinaryFormResponse);
+
+		appaloosaClient.getUploadForm();
+	}
 
 	@Test
 	public void deployFileIntegrationTest() throws AppaloosaDeployException {

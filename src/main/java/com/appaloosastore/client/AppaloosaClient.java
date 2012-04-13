@@ -83,21 +83,19 @@ public class AppaloosaClient {
 	private int proxyPort;
 
 	public AppaloosaClient(String organisationToken) {
-		this.organisationToken = organisationToken;
+		this.organisationToken = StringUtils.trimToNull(organisationToken);
 
 		resetHttpConnection();
 	}
 
 	public AppaloosaClient(String organisationToken, String proxyHost,
 			int proxyPort, String proxyUser, String proxyPass) {
-		this.organisationToken = organisationToken;
+		this(organisationToken);
 
 		this.proxyHost = proxyHost;
 		this.proxyUser = proxyUser;
 		this.proxyPass = proxyPass;
 		this.proxyPort = proxyPort;
-
-		resetHttpConnection();
 	}
 
 	/**
