@@ -51,6 +51,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -360,17 +361,18 @@ public class AppaloosaClient {
 		httpClient = new DefaultHttpClient();
 
 		if (proxyHost != null && !proxyHost.isEmpty() && proxyPort > 0) {
-			Credentials cred = null;
-			if (proxyUser != null && !proxyUser.isEmpty())
-				cred = new UsernamePasswordCredentials(proxyUser, proxyPass);
-
-			((DefaultHttpClient) httpClient).getCredentialsProvider()
-					.setCredentials(new AuthScope(proxyHost, proxyPort), cred);
+			if (proxyUser != null && !proxyUser.isEmpty()) {
+                Credentials cred = new UsernamePasswordCredentials(proxyUser, proxyPass);
+                ((DefaultHttpClient) httpClient).getCredentialsProvider()
+                        .setCredentials(new AuthScope(proxyHost, proxyPort), cred);
+            }
 			HttpHost proxy = new HttpHost(proxyHost, proxyPort);
 			httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
 					proxy);
 		}
-	}
+
+        httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, new Integer(60*1000));
+    }
 
 	public void useLogger(PrintStream logger) {
 		this.logger = logger;
@@ -413,7 +415,7 @@ public class AppaloosaClient {
 	 * To change port of appaloosa server. Mostly for tests usage or for future
 	 * evolutions.
 	 * 
-	 * @param appaloosaUrl
+	 * @param port
 	 */
 	public void setPort(int port) {
 		appaloosaPort = port;
