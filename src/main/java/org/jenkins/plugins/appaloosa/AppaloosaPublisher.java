@@ -167,7 +167,8 @@ public class AppaloosaPublisher extends Recorder {
 
         Collection predicated = CollectionUtils.select(builds, new Predicate() {
             public boolean evaluate(Object o) {
-                return ((AbstractBuild<?, ?>) o).getResult().isBetterOrEqualTo(Result.SUCCESS);
+                Result r = ((AbstractBuild<?, ?>) o).getResult();
+                return r!=null && r.isBetterOrEqualTo(Result.SUCCESS);
             }
         });
 
