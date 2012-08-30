@@ -42,6 +42,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
+import hudson.util.Secret;
 import net.sf.json.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -62,7 +63,7 @@ import java.util.List;
 
 public class AppaloosaPublisher extends Recorder {
 
-    public final String token;
+    public final Secret token;
     public final String filePattern;
 	public final String proxyHost;
     public final String proxyUser;
@@ -71,7 +72,7 @@ public class AppaloosaPublisher extends Recorder {
 	
     @DataBoundConstructor
     public AppaloosaPublisher(String token, String filePattern, String proxyHost, String proxyUser, String proxyPass, int proxyPort) {
-        this.token = token;
+        this.token = Secret.fromString(token);
         this.filePattern = filePattern;
 		this.proxyHost = proxyHost;
 		this.proxyUser = proxyUser;
@@ -94,7 +95,7 @@ public class AppaloosaPublisher extends Recorder {
             return true; // nothing to do
 
         // Validates that the organization token is filled in the project configuration.
-        if (StringUtils.isBlank(token)) {
+        if (StringUtils.isBlank(Secret.toString(token))) {
             listener.error(Messages._AppaloosaPublisher_noToken().toString());
             return false;
         }
@@ -131,7 +132,7 @@ public class AppaloosaPublisher extends Recorder {
         }
 
         // Initialize Appaloosa Client
-        AppaloosaClient appaloosaClient = new AppaloosaClient(token,proxyHost,proxyPort,proxyUser,proxyPass);
+        AppaloosaClient appaloosaClient = new AppaloosaClient(Secret.toString(token),proxyHost,proxyPort,proxyUser,proxyPass);
         appaloosaClient.useLogger(listener.getLogger());
 
         boolean result=true;

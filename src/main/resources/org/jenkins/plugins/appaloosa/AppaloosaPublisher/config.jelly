@@ -33,7 +33,7 @@
       When submitted, it will be passed to the corresponding constructor parameter.
     -->
     <f:entry title="${%Token}" field="token">
-        <f:textbox />
+        <f:password />
     </f:entry>
     <f:entry title="${%Filename Pattern}" field="filePattern">
         <f:textbox default="**/*.ipa,**/*.apk"/>
