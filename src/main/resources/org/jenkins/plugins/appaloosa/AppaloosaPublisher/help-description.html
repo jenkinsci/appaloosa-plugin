@@ -1,7 +1,7 @@
 <!--
   ~ The MIT License
   ~
-  ~ Copyright (c) 2011 eXo platform
+  ~ Copyright (c) 2013 OCTO Technology
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,9 @@
   -->
 
 <div>
-	Appaloosa token dedicated for your store. You'll find it in your store settings. 
-	More help on <a href="https://wiki.jenkins-ci.org/display/JENKINS/Appaloosa+Plugin">appaloosa plugin wiki</a>
+   Names of the groups, separated by "|" that will allowed to see this version.
+   Example: "Group 1 | Group 2".
+   When empty the update will be publish to previous allowed groups if a previous update exists, 
+   otherwise it will be published to default group "everybody".
+   You can also specify to publish your file to the default group "everybody", you have to use the name "everybody" (even if your store is in French).
 </div>

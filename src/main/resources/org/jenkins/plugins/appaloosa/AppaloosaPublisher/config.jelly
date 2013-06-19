@@ -38,6 +38,12 @@
     <f:entry title="${%Filename Pattern}" field="filePattern">
         <f:textbox default="**/*.ipa,**/*.apk"/>
     </f:entry>
+    <f:entry title="${%Description}" field="description">
+        <f:textbox default="Uploaded by jenkins"/>
+    </f:entry>
+    <f:entry title="${%Groups}" field="groups">
+        <f:textbox default="everybody"/>
+    </f:entry>
 	<f:advanced>
 		<f:entry title="Proxy Host" field="proxyHost">
 			<f:textbox />

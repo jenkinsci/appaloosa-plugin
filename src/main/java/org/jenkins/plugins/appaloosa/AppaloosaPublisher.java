@@ -24,17 +24,16 @@
 
 package org.jenkins.plugins.appaloosa;
 
-import com.appaloosastore.client.AppaloosaClient;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Hudson;
 import hudson.model.Node;
-import hudson.model.Result;
 import hudson.plugins.promoted_builds.Promotion;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -43,7 +42,16 @@ import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.RunList;
 import hudson.util.Secret;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import net.sf.json.JSONObject;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.io.FileUtils;
@@ -54,12 +62,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import com.appaloosastore.client.AppaloosaClient;
 
 public class AppaloosaPublisher extends Recorder {
 
@@ -69,15 +72,21 @@ public class AppaloosaPublisher extends Recorder {
     public final String proxyUser;
     public final String proxyPass;
     public final int proxyPort;
+	public final String description;
+	public final String groups;
 	
     @DataBoundConstructor
-    public AppaloosaPublisher(String token, String filePattern, String proxyHost, String proxyUser, String proxyPass, int proxyPort) {
+	public AppaloosaPublisher(String token, String filePattern,
+			String proxyHost, String proxyUser, String proxyPass,
+			int proxyPort, String description, String groups) {
         this.token = Secret.fromString(token);
         this.filePattern = filePattern;
 		this.proxyHost = proxyHost;
 		this.proxyUser = proxyUser;
 		this.proxyPass = proxyPass;
 		this.proxyPort = proxyPort;
+		this.description = description;
+		this.groups = groups;
     }
 
     @Override
@@ -147,8 +156,8 @@ public class AppaloosaPublisher extends Recorder {
                 FilePath remoteFile = rootDir.child(filename);
                 remoteFile.copyTo(tmpLocalFile);
 
-                listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename));
-                appaloosaClient.deployFile(tmpArchive.getAbsolutePath());
+				listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename, description, groups));
+				appaloosaClient.deployFile(tmpArchive.getAbsolutePath(), description, groups);
                 listener.getLogger().println(Messages.AppaloosaPublisher_deployed());
             } catch (Exception e) {
                 listener.getLogger().println(Messages.AppaloosaPublisher_deploymentFailed(e.getMessage()));
