@@ -24,7 +24,7 @@
 	</parent>
 	<!-- which version of Jenkins is this plugin built against? -->
 	<artifactId>appaloosa-plugin</artifactId>
-	<version>1.4.0</version>
+	<version>1.4.1-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 	<name>Appaloosa Plugin</name>
 	<description>Publish your mobile applications (Android, iOS, ...) to the &lt;a href="http://www.appaloosa-store.com"&gt;appaloosa-store&lt;/a&gt; platform.</description>
