@@ -23,5 +23,11 @@
   -->
 
 <div>
-   New description of this version. Leave this field blank if you want to use the previous description.
+   Names of the groups, separated by "|" that will allowed to see this version.
+   Example: "Group 1 | Group 2".
+   When empty the update will be publish to previous allowed groups if a previous update exists, 
+   otherwise it will be published to default group "everybody".
+   You can also specify to publish your file to the default group "everybody", you have to use the name "everybody" (even if your store is in French).
+   <a target="_blank" href="https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-JenkinsSetEnvironmentVariables">See available environment variables here.</a>
+   Example: $GIT_COMMIT  
 </div>

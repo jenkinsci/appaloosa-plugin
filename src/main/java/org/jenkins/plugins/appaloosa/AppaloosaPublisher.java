@@ -24,6 +24,7 @@
 
 package org.jenkins.plugins.appaloosa;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -72,7 +73,7 @@ public class AppaloosaPublisher extends Recorder {
     public final String proxyUser;
     public final String proxyPass;
     public final int proxyPort;
-	public final String description;
+	public String description;
 	public final String groups;
 	
     @DataBoundConstructor
@@ -139,6 +140,9 @@ public class AppaloosaPublisher extends Recorder {
             listener.error(Messages._AppaloosaPublisher_noArtifactsFound(filePattern).toString());
             return false;
         }
+        
+    	String descriptionToSend = evaluateField(description, build, listener);
+    	String groupsToSend = evaluateField(groups, build, listener);
 
         // Initialize Appaloosa Client
         AppaloosaClient appaloosaClient = new AppaloosaClient(Secret.toString(token),proxyHost,proxyPort,proxyUser,proxyPass);
@@ -156,8 +160,8 @@ public class AppaloosaPublisher extends Recorder {
                 FilePath remoteFile = rootDir.child(filename);
                 remoteFile.copyTo(tmpLocalFile);
 
-				listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename, description, groups));
-				appaloosaClient.deployFile(tmpArchive.getAbsolutePath(), description, groups);
+				listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename, descriptionToSend, groupsToSend));
+				appaloosaClient.deployFile(tmpArchive.getAbsolutePath(), descriptionToSend, groupsToSend);
                 listener.getLogger().println(Messages.AppaloosaPublisher_deployed());
             } catch (Exception e) {
                 listener.getLogger().println(Messages.AppaloosaPublisher_deploymentFailed(e.getMessage()));
@@ -169,6 +173,11 @@ public class AppaloosaPublisher extends Recorder {
         }
         return result;
     }
+
+	private String evaluateField(String field, AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
+    	EnvVars vars = build.getEnvironment(listener);
+    	return vars.expand(field);
+	}
 
 	@Override
     public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {

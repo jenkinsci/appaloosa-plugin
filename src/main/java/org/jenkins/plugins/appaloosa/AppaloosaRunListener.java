@@ -24,6 +24,8 @@
 
 package org.jenkins.plugins.appaloosa;
 
+import java.io.IOException;
+
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
@@ -64,7 +66,10 @@ public class AppaloosaRunListener extends RunListener<AbstractBuild> {
                             new ArtifactArchiver(((AppaloosaPublisher) buildStep).filePattern, null, true).perform(r, null, (BuildListener) listener);
                         } catch (InterruptedException e) {
                             listener.error(Messages.AppaloosaRunListener_BackupError(), e);
-                        }
+                        } catch (IOException e) {
+							// TODO Auto-generated catch block
+                        	listener.error(Messages.AppaloosaRunListener_BackupError(), e);
+						}
                     }
                 }
             }
