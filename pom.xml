@@ -47,6 +47,11 @@
 			<name>Benoit Lafontaine</name>
 			<email>joel1di1@gmail.com</email>
 		</developer>
+		<developer>
+			<id>rsfez</id>
+			<name>Robin Sfez</name>
+			<email>rsfez@octo.com</email>
+		</developer>
 	</developers>
 	<scm>
 		<connection>scm:git:ssh://github.com/jenkinsci/appaloosa-plugin.git</connection>
