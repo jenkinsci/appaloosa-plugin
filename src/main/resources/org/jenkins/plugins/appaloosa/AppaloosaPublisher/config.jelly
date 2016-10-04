@@ -41,6 +41,9 @@
     <f:entry title="${%Description}" field="description">
         <f:textbox default="Uploaded by jenkins"/>
     </f:entry>
+    <f:entry title="${%Changelog}" field="changelog">
+        <f:textbox default=""/>
+    </f:entry>
     <f:entry title="${%Groups}" field="groups">
         <f:textbox default="everybody"/>
     </f:entry>
