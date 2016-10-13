@@ -74,12 +74,13 @@ public class AppaloosaPublisher extends Recorder {
     public final String proxyPass;
     public final int proxyPort;
 	public String description;
+    public String changelog;
 	public final String groups;
 	
     @DataBoundConstructor
 	public AppaloosaPublisher(String token, String filePattern,
 			String proxyHost, String proxyUser, String proxyPass,
-			int proxyPort, String description, String groups) {
+			int proxyPort, String description, String groups, String changelog) {
         this.token = Secret.fromString(token);
         this.filePattern = filePattern;
 		this.proxyHost = proxyHost;
@@ -87,6 +88,7 @@ public class AppaloosaPublisher extends Recorder {
 		this.proxyPass = proxyPass;
 		this.proxyPort = proxyPort;
 		this.description = description;
+		this.changelog = changelog;
 		this.groups = groups;
     }
 
@@ -142,6 +144,7 @@ public class AppaloosaPublisher extends Recorder {
         }
         
     	String descriptionToSend = evaluateField(description, build, listener);
+    	String changelogToSend = evaluateField(changelog, build, listener);
     	String groupsToSend = evaluateField(groups, build, listener);
 
         // Initialize Appaloosa Client
@@ -160,8 +163,8 @@ public class AppaloosaPublisher extends Recorder {
                 FilePath remoteFile = rootDir.child(filename);
                 remoteFile.copyTo(tmpLocalFile);
 
-				listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename, descriptionToSend, groupsToSend));
-				appaloosaClient.deployFile(tmpArchive.getAbsolutePath(), descriptionToSend, groupsToSend);
+				listener.getLogger().println(Messages.AppaloosaPublisher_deploying(filename, descriptionToSend, groupsToSend, changelogToSend));
+				appaloosaClient.deployFile(tmpArchive.getAbsolutePath(), descriptionToSend, groupsToSend, changelogToSend);
                 listener.getLogger().println(Messages.AppaloosaPublisher_deployed());
             } catch (Exception e) {
                 listener.getLogger().println(Messages.AppaloosaPublisher_deploymentFailed(e.getMessage()));
