@@ -87,6 +87,12 @@
 			<artifactId>promoted-builds</artifactId>
 			<version>2.4</version>
 			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>org.sonatype.sisu</groupId>
+					<artifactId>sisu-guice</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.appaloosa-store</groupId>
