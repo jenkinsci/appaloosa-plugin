@@ -28,7 +28,6 @@ import hudson.remoting.VirtualChannel;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
-import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,10 +61,5 @@ public class FileFinder implements FilePath.FileCallable<List<String>> {
         catch (BuildException exception) {
             return Collections.emptyList();
         }
-    }
-
-    @Override
-    public void checkRoles(RoleChecker roleChecker) throws SecurityException {
-        
     }
 }
