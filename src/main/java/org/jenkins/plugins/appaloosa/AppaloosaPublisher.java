@@ -143,9 +143,11 @@ public class AppaloosaPublisher extends Recorder {
             return false;
         }
         
-    	String descriptionToSend = evaluateField(description, build, listener);
-    	String changelogToSend = evaluateField(changelog, build, listener);
-    	String groupsToSend = evaluateField(groups, build, listener);
+    	String descriptionToSend = evaluateField(description, build, listener, rootDir);
+
+    	String changelogToSend = evaluateField(changelog, build, listener, rootDir);
+
+        String groupsToSend = evaluateField(groups, build, listener, rootDir);
 
         // Initialize Appaloosa Client
         AppaloosaClient appaloosaClient = new AppaloosaClient(Secret.toString(token),proxyHost,proxyPort,proxyUser,proxyPass);
@@ -177,9 +179,18 @@ public class AppaloosaPublisher extends Recorder {
         return result;
     }
 
-	private String evaluateField(String field, AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
+	private String evaluateField(String field, AbstractBuild build, BuildListener listener, FilePath rootDirectory) throws IOException, InterruptedException {
     	EnvVars vars = build.getEnvironment(listener);
-    	return vars.expand(field);
+    	String fieldValue = vars.expand(field);
+
+        if (!fieldValue.isEmpty()) {
+            //If the filed if a file path and it exists, we grab the content, otherwise the field is taken as is.
+            FilePath changelogFilePath = new FilePath(rootDirectory, fieldValue);
+            if (changelogFilePath.exists()) {
+                fieldValue = changelogFilePath.readToString();
+            }
+        }
+        return fieldValue;
 	}
 
 	@Override
