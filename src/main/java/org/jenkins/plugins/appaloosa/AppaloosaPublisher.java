@@ -76,7 +76,7 @@ public class AppaloosaPublisher extends Recorder {
 	public String description;
     public String changelog;
 	public final String groups;
-	
+
     @DataBoundConstructor
 	public AppaloosaPublisher(String token, String filePattern,
 			String proxyHost, String proxyUser, String proxyPass,
@@ -142,11 +142,9 @@ public class AppaloosaPublisher extends Recorder {
             listener.error(Messages._AppaloosaPublisher_noArtifactsFound(filePattern).toString());
             return false;
         }
-        
-    	String descriptionToSend = evaluateField(description, build, listener, rootDir);
 
-    	String changelogToSend = evaluateField(changelog, build, listener, rootDir);
-
+        String descriptionToSend = evaluateField(description, build, listener, rootDir);
+        String changelogToSend = evaluateField(changelog, build, listener, rootDir);
         String groupsToSend = evaluateField(groups, build, listener, rootDir);
 
         // Initialize Appaloosa Client
@@ -184,10 +182,10 @@ public class AppaloosaPublisher extends Recorder {
     	String fieldValue = vars.expand(field);
 
         if (!fieldValue.isEmpty()) {
-            //If the filed if a file path and it exists, we grab the content, otherwise the field is taken as is.
-            FilePath changelogFilePath = new FilePath(rootDirectory, fieldValue);
-            if (changelogFilePath.exists()) {
-                fieldValue = changelogFilePath.readToString();
+            //If the field is a file path and it exists, we grab the content, otherwise the field is taken as is.
+            FilePath filePath = new FilePath(rootDirectory, fieldValue);
+            if (filePath.exists()) {
+                fieldValue = filePath.readToString();
             }
         }
         return fieldValue;
