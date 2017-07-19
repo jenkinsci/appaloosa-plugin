@@ -23,11 +23,18 @@
   -->
 
 <div>
-   Names of the groups, separated by "|" that will allowed to see this version.
+   <p>Names of the groups, separated by "|" that will allowed to see this version.
    Example: "Group 1 | Group 2".
    When empty the update will be publish to previous allowed groups if a previous update exists, 
    otherwise it will be published to default group "everybody".
    You can also specify to publish your file to the default group "everybody", you have to use the name "everybody" (even if your store is in French).
-   <a target="_blank" href="https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-JenkinsSetEnvironmentVariables">See available environment variables here.</a>
-   Example: $GIT_COMMIT  
+   </p>
+   <a target="_blank" href="https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-JenkinsSetEnvironmentVariables">See available environment variables here.</a><br>
+   <p>
+      Example:<br>
+         File Path:<br>
+            - path/to/my/groups.txt<br>
+         Content:<br>
+            - Group 1 | Group 2
+   </p>
 </div>
