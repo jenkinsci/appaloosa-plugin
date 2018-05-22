@@ -92,6 +92,8 @@
 			<groupId>com.appaloosa-store</groupId>
 			<artifactId>appaloosa-client</artifactId>
 			<version>1.4</version>
+            <scope>system</scope>
+            <systemPath>/Users/bti/.m2/repository/com/appaloosa-store/appaloosa-client/1.4-SNAPSHOT/appaloosa-client-1.4-SNAPSHOT-shaded.jar</systemPath>
 		</dependency>
 	</dependencies>
 	<distributionManagement>
