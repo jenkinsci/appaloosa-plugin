@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>com.appaloosa-store</groupId>
 			<artifactId>appaloosa-client</artifactId>
-			<version>1.10</version>
+			<version>1.14</version>
 		</dependency>
 	</dependencies>
 	<distributionManagement>
