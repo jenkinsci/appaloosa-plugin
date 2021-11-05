@@ -125,7 +125,7 @@ public class AppaloosaPublisher extends Recorder {
         FilePath rootDir;
         // If the promotion plugin is used we have to take care to get data from the original build (not the promotion build)
         if (Hudson.getInstance().getPlugin("promoted-builds") != null && build instanceof Promotion) {
-            rootDir = new FilePath (((Promotion) build).getTarget().getArtifactsDir());
+            rootDir = new FilePath (((Promotion) build).getTargetBuild().getArtifactsDir());
         } else {
             rootDir = build.getWorkspace();
             if (rootDir==null) { // slave down?
