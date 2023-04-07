@@ -69,6 +69,23 @@
 			<url>https://github.com/joel1di1/joel1di1-mvn-repo/raw/master/releases/</url>
 		</repository>
 	</repositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jenkins-ci.tools</groupId>
+				<artifactId>maven-hpi-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<disabledTestInjection>true</disabledTestInjection>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.kohsuke</groupId>
+				<artifactId>access-modifier-checker</artifactId>
+				<version>1.20</version>
+			</plugin>
+		</plugins>
+	</build>
 	<pluginRepositories>
 		<pluginRepository>
 			<id>repo.jenkins-ci.org</id>
